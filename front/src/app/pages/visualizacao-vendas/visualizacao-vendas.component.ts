@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { VisualizacaoVendasService } from '../../services/visualizacao-vendas.service';
-import { Chart } from 'chart.js'; // Importação do Chart.js
+import { Chart, LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend, LineController } from 'chart.js';
 
 @Component({
   selector: 'app-visualizacao-vendas',
@@ -8,70 +8,73 @@ import { Chart } from 'chart.js'; // Importação do Chart.js
   styleUrls: ['./visualizacao-vendas.component.scss'],
 })
 export class VisualizacaoVendasComponent implements OnInit {
-  vendas: any[] = []; // Lista de vendas
-  graficoLinhas: any; // Dados para o gráfico de linhas
-  graficoBarras: any; // Dados para o gráfico de barras
+  vendas: any[] = [];
 
-  constructor(private visualizacaoService: VisualizacaoVendasService) {}
+  constructor(private visualizacaoVendasService: VisualizacaoVendasService) {}
 
   ngOnInit() {
-    this.carregarVendas();
-    this.carregarDadosGraficos();
+    // Registre os módulos necessários do Chart.js
+    Chart.register(
+      LinearScale,
+      CategoryScale,
+      PointElement,
+      LineElement,
+      Title,
+      Tooltip,
+      Legend,
+      LineController // Registre o controlador de linha aqui
+    );
+
+    // Chame a função para buscar os dados da API
+    this.visualizacaoVendasService.obterVendasMensais().subscribe(
+      (dados) => {
+        this.vendas = dados;
+        this.criarGrafico();
+      },
+      (erro) => {
+        console.error('Erro ao carregar dados das vendas mensais', erro);
+      }
+    );
   }
 
-  // Carrega a lista de vendas mensais
-  carregarVendas() {
-    this.visualizacaoService.obterVendasMensais().subscribe((response: any[]) => {
-      this.vendas = response;
-    });
-  }
-
-  // Carrega os dados para os gráficos
-  carregarDadosGraficos() {
-    this.visualizacaoService.obterDadosGraficoLinhas().subscribe((response: any) => {
-      this.graficoLinhas = response;
-      this.renderizarGraficoLinhas();
-    });
-
-    this.visualizacaoService.obterDadosGraficoBarras().subscribe((response: any) => {
-      this.graficoBarras = response;
-      this.renderizarGraficoBarras();
-    });
-  }
-
-  // Renderiza o gráfico de linhas
-  renderizarGraficoLinhas() {
-    const canvas = document.getElementById('graficoLinhas') as HTMLCanvasElement;
-    const ctx = canvas?.getContext('2d');
+  criarGrafico() {
+    const ctx = document.getElementById('graficoLinhas') as HTMLCanvasElement;
 
     if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: this.graficoLinhas,
+      // Inicialize o gráfico de linhas
+      const grafico = new Chart(ctx, {
+        type: 'line', // Defina o tipo do gráfico como 'line'
+        data: {
+          labels: this.vendas.map((venda) => venda.mes), // Use os meses do retorno da API
+          datasets: [
+            {
+              label: 'Valor de Vendas',
+              data: this.vendas.map((venda) => venda.valorVenda), // Use o valorVenda da API
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+            },
+          ],
+        },
         options: {
           responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Valor Mensal das Vendas',
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  // Asegure-se de que context.raw é um número
+                  const value = context.raw as number; // Faça o cast do valor como número
+                  return `R$ ${value.toFixed(2)}`;
+                },
+              },
+            },
+          },
         },
       });
-    } else {
-      console.error('Canvas para gráfico de linhas não encontrado.');
-    }
-  }
-
-  // Renderiza o gráfico de barras
-  renderizarGraficoBarras() {
-    const canvas = document.getElementById('graficoBarras') as HTMLCanvasElement;
-    const ctx = canvas?.getContext('2d');
-
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'bar',
-        data: this.graficoBarras,
-        options: {
-          responsive: true,
-        },
-      });
-    } else {
-      console.error('Canvas para gráfico de barras não encontrado.');
     }
   }
 }

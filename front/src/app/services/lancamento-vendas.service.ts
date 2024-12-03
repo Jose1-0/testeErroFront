@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,12 @@ export class LancamentoVendasService {
 
   // Lista todos os produtos disponíveis
   listarProdutos(): Observable<any[]> {
-    return this.http.get<any[]>(this.produtosUrl);
+    return this.http.get<any[]>(this.produtosUrl).pipe(
+      catchError(error => {
+        console.error('Erro ao listar produtos:', error);
+        return of([]); // Retorna um array vazio em caso de erro
+      })
+    );
   }
 
   // Verifica os detalhes de um produto
@@ -42,5 +47,15 @@ export class LancamentoVendasService {
   listarVendas(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/listar`);
   }
+
+listarVendasMensais(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/vendas-mensais`).pipe(
+    catchError(error => {
+      console.error('Erro ao carregar vendas mensais:', error);
+      return of([]); // Retorna um array vazio em caso de erro
+    })
+  );
+}
+
 
 }
