@@ -31,13 +31,13 @@ export class LancamentoVendasComponent implements OnInit {
     );
     if (itemExistente) {
       itemExistente.quantidade++;
-      itemExistente.subtotal += produto.preco;
+      itemExistente.subtotal += produto.precoVenda;
     } else {
       this.carrinho.push({
         id: produto.id,
         nome: produto.nome,
         quantidade: 1,
-        subtotal: produto.preco,
+        subtotal: produto.precoVenda,
       });
     }
     this.calcularTotal();

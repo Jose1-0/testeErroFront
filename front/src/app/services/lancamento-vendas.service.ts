@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class LancamentoVendasService {
   private baseUrl = 'http://localhost:8081/api/vendas'; // Base URL do backend
-  private produtosUrl = 'http://localhost:8081/api/produtos'; // Endpoint para listar produtos
+  private produtosUrl = 'http://localhost:8081/api/vendas/listar'; // Endpoint para listar produtos
   private apiUrl = 'http://localhost:8081/api';
 
   constructor(private http: HttpClient) {}
