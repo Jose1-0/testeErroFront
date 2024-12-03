@@ -13,8 +13,8 @@
     <ion-item *ngFor="let produto of produtos" (click)="adicionarAoCarrinho(produto)">
       <ion-label>
         <h2>{{ produto.nome }}</h2>
-        <p>Preço: R$ {{ produto.preco | number: '1.2-2' }}</p>
-        <p>Estoque: {{ produto.estoque }}</p>
+        <p>Preço: R$ {{ produto.precoVenda | number: '1.2-2' }}</p>
+        <p>Estoque: {{ produto.quantidade }}</p>
       </ion-label>
       <ion-button slot="end" fill="clear">Adicionar</ion-button>
     </ion-item>

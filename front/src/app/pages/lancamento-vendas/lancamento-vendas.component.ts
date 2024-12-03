@@ -11,10 +11,11 @@ export class LancamentoVendasComponent implements OnInit {
   carrinho: any[] = []; // Itens no carrinho
   total: number = 0; // Total da venda
 
-  constructor(private vendasService: LancamentoVendasService) { }
+  constructor(private vendasService: LancamentoVendasService) {}
 
   ngOnInit() {
     this.carregarProdutos();
+
   }
 
   // Carrega a lista de produtos do backend
@@ -24,25 +25,41 @@ export class LancamentoVendasComponent implements OnInit {
     });
   }
 
-  // Adiciona um produto ao carrinho
   adicionarAoCarrinho(produto: any) {
     const itemExistente = this.carrinho.find(
       (item) => item.id === produto.id
     );
+  
+    // Caso o produto já esteja no carrinho
     if (itemExistente) {
+      console.log(itemExistente.quantidade, "35");
+      if (itemExistente.quantidade >= produto.quantidade) {
+        console.log(produto, "37");
+        alert(`Estoque insuficiente para o produto: ${produto.nome}`);
+        return;
+      }
       itemExistente.quantidade++;
       itemExistente.subtotal += produto.precoVenda;
     } else {
+      // Caso o produto não esteja no carrinho
+      if (produto.estoque <= 0) {
+        console.log("if verifica quanrtidade ", produto);
+        alert(`O produto ${produto.nome} está sem estoque.`);
+        return;
+      }
       this.carrinho.push({
         id: produto.id,
         nome: produto.nome,
+        preco: produto.precoVenda,
         quantidade: 1,
         subtotal: produto.precoVenda,
       });
     }
+  
+    // Atualiza o total do carrinho
     this.calcularTotal();
   }
-
+  
   // Calcula o total da venda
   calcularTotal() {
     this.total = this.carrinho.reduce(
